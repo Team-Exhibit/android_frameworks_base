@@ -39,8 +39,6 @@ class PermissionDialog extends BasePermissionDialog {
     private final AppOpsService mService;
     private final String mPackageName;
     private final int mCode;
-    private View  mView;
-    private CheckBox mChoice;
     private int mUid;
     final CharSequence[] mOpLabels;
     private Context mContext;
@@ -76,26 +74,17 @@ class PermissionDialog extends BasePermissionDialog {
         setButton(DialogInterface.BUTTON_NEGATIVE,
                     res.getString(com.android.internal.R.string.deny), mHandler.obtainMessage(ACTION_IGNORED));
 
-        setTitle(res.getString(com.android.internal.R.string.privacy_guard_dialog_title));
+        setTitle(res.getString(com.android.internal.R.string.permission));
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle("Permission info: " + getAppName(mPackageName));
         attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR
                 | WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
 
-        mView = getLayoutInflater().inflate(
-             com.android.internal.R.layout.permission_confirmation_dialog,
-             null);
-        TextView tv = (TextView) mView.findViewById(
-            com.android.internal.R.id.permission_text);
-        mChoice = (CheckBox) mView.findViewById(
-            com.android.internal.R.id.permission_remember_choice_checkbox);
         String name = getAppName(mPackageName);
         if(name == null)
             name = mPackageName;
-        tv.setText(mContext.getString(com.android.internal.R.string.privacy_guard_dialog_summary,
-                name, mOpLabels[mCode]));
-        setView(mView);
+        setMessage(name + ": " + mOpLabels[mCode]);
 
         // After the timeout, pretend the user clicked the quit button
         //mHandler.sendMessageDelayed(
@@ -122,7 +111,7 @@ class PermissionDialog extends BasePermissionDialog {
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             int mode;
-            boolean remember = mChoice.isChecked();
+            boolean remember = true;
             switch(msg.what) {
                 case ACTION_ALLOWED:
                     mode = AppOpsManager.MODE_ALLOWED;

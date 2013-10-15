@@ -2278,6 +2278,9 @@
          to unlock the keyguard.  Displayed in one line in a large font.  -->
     <string name="keyguard_password_wrong_pin_code">Incorrect PIN code.</string>
 
+    <!-- Displayed when a SIM PIN/PUK is entered incorrectly. -->
+    <string name="pinpuk_attempts">\nAttempts Remaining :</string>
+
     <!-- Instructions telling the user how to unlock the phone. -->
     <string name="keyguard_label_text">To unlock, press Menu then 0.</string>
 
@@ -2312,12 +2315,6 @@
     <string name="lockscreen_pattern_wrong">Try again</string>
     <!-- On the unlock password screen, shown when the user enters the wrong lock password and must try again. -->
     <string name="lockscreen_password_wrong">Try again</string>
-    <!-- On the unlock gesture screen, shown at the top of the unlock screen to tell the user what to do. Below this text is the place for the user to draw the gesture. -->
-    <string name="lockscreen_gesture_instructions">Draw gesture to unlock</string>
-    <!-- Shown to confirm that the user entered their lock gesture correctly. -->
-    <string name="lockscreen_gesture_correct">Correct!</string>
-    <!-- On the unlock gesture screen, shown when the user enters the wrong lock gesture and must try again. -->
-    <string name="lockscreen_gesture_wrong">Try again</string>
     <!-- Shown when face unlock failed multiple times so we're just using the backup -->
     <string name="faceunlock_multiple_failures">Maximum Face Unlock attempts exceeded</string>
 
@@ -2363,6 +2360,8 @@
 
     <!-- Shown in the lock screen when there is emergency calls only mode. -->
     <string name="emergency_calls_only" msgid="2485604591272668370">Emergency calls only</string>
+    <!-- Shown in the lock screen when there is SIM card IO error. -->
+    <string name="lockscreen_sim_error_message_short">Invalid Card.</string>
 
     <!-- When the user inserts a sim card from an unsupported network, it becomes network
          locked -->
@@ -2373,15 +2372,18 @@
          PUK locked (Pin Unlock Kode) -->
     <string name="lockscreen_sim_puk_locked_message">SIM card is PUK-locked.</string>
     <!-- Shown in the lock screen when the SIM has become PUK locked and the user must call customer care to unlock it. -->
-    <string name="lockscreen_sim_puk_locked_instructions">See the User Guide or contact Customer Care.</string>
+    <string name="lockscreen_sim_puk_locked_instructions">PIN1 Blocked. Enter PUK1\nor\nPlease see the User Guide or contact Customer Care.</string>
 
-    <!-- Shown in the lock screen to tell the user that their SIM is locked and they must unlock it. -->
-    <string name="lockscreen_sim_locked_message">SIM card is locked.</string>
+    <!-- Shown in the lock screen to tell the user that their SIM/RUIM is locked and they must unlock it. -->
+    <string name="lockscreen_sim_locked_message">SIM/RUIM card is locked.</string>
 
     <!-- For the unlock screen, When the user enters a sim unlock code, it takes a little while to check
          whether it is valid, and to unlock the sim if it is valid.  we display a
          progress dialog in the meantime.  this is the emssage. -->
     <string name="lockscreen_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+
+    <!-- Shown in the lock screen to tell the user that phone is in airplane mode-->
+    <string name="lockscreen_airplane_mode_on">Airplane Mode</string>
 
     <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
          drawing the unlock pattern -->
@@ -2529,8 +2531,6 @@
     <string name="keyguard_accessibility_slide_unlock">Slide unlock.</string>
     <!-- Accessibility description of the pattern unlock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pattern_unlock">Pattern unlock.</string>
-    <!-- Accessibility description of the gesture unlock. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_gesture_unlock">Gesture unlock.</string>
     <!-- Accessibility description of the face unlock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_face_unlock">Face unlock.</string>
     <!-- Accessibility description of the pin lock. [CHAR_LIMIT=none] -->
@@ -2539,8 +2539,6 @@
     <string name="keyguard_accessibility_password_unlock">Password unlock.</string>
     <!-- Accessibility description of the unlock pattern area. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pattern_area">Pattern area.</string>
-    <!-- Accessibility description of the unlock gesture area. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_gesture_area">Gesture area.</string>
     <!-- Accessibility description of the unlock slide area. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_slide_area">Slide area.</string>
 
@@ -4179,10 +4177,6 @@
     <string name="kg_forgot_pattern_button_text">Forgot Pattern</string>
     <!-- Message shown when user enters wrong pattern -->
     <string name="kg_wrong_pattern">Wrong Pattern</string>
-    <!-- Message shown in gesture unlock after some number of unsuccessful attempts -->
-    <string name="kg_forgot_gesture_button_text">Forgot Gesture</string>
-    <!-- Message shown when user enters wrong pattern -->
-    <string name="kg_wrong_gesture">Wrong Gesture</string>
     <!-- Message shown when user enters wrong password -->
     <string name="kg_wrong_password">Wrong Password</string>
     <!-- Message shown when user enters wrong PIN -->
@@ -4191,8 +4185,6 @@
     <string name="kg_too_many_failed_attempts_countdown">Try again in <xliff:g id="number">%1$d</xliff:g> seconds.</string>
     <!-- Instructions for using the pattern unlock screen -->
     <string name="kg_pattern_instructions">Draw your pattern</string>
-    <!-- Instructions for using the gesture unlock screen -->
-    <string name="kg_gesture_instructions">Draw your gesture</string>
     <!-- Instructions for using the SIM PIN unlock screen -->
     <string name="kg_sim_pin_instructions">Enter SIM PIN</string>
     <!-- Instructions for using the PIN unlock screen -->
@@ -4245,10 +4237,6 @@
     </string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message">
         You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
-    </string>
-    <string name="kg_too_many_failed_gesture_attempts_dialog_message">
-        You have incorrectly drawn your unlock gesture <xliff:g id="number">%d</xliff:g> times.
         \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
@@ -4546,8 +4534,16 @@
     <!-- Cling help message when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
     <string name="immersive_mode_confirmation" msgid="8554991488096662508">Swipe down from the top to exit full screen.</string>
 
-    <!-- Longer version of toast bar message when hiding the transient navigation bar (if room) -->
-    <string name="transient_navigation_confirmation_long">Swipe from edge of screen to reveal system bar</string>
     <add-resource type="bool" name="config_hotswapCapable"></add-resource>
 
+    <!-- Displayed when the USSD/SS request is modified by STK CC to a
+    different request. This will be displayed in a toast. -->
+    <string name="stk_cc_ussd_to_dial">USSD request is modified to DIAL request.</string>
+    <string name="stk_cc_ussd_to_ss">USSD request is modified to SS request.</string>
+    <string name="stk_cc_ussd_to_ussd">USSD request is modified to new USSD request.</string>
+    <string name="stk_cc_ss_to_dial">SS request is modified to DIAL request.</string>
+    <string name="stk_cc_ss_to_ussd">SS request is modified to USSD request.</string>
+    <string name="stk_cc_ss_to_ss">SS request is modified to new SS request.</string>
+
+    <string name="permission">Permission</string>
 </resources>

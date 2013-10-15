@@ -38,7 +38,7 @@ class BasePermissionDialog extends AlertDialog {
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle("Permission Dialog");
         getWindow().setAttributes(attrs);
-        setIcon(R.drawable.ic_privacy_guard);
+        setIconAttribute(R.attr.alertDialogIcon);
     }
 
     public void onStart() {
