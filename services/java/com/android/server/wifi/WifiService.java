@@ -332,7 +332,7 @@ public final class WifiService extends IWifiManager.Stub {
 
         // If we are already disabled (could be due to airplane mode), avoid changing persist
         // state here
-        if (wifiEnabled) setWifiEnabledInternal(mContext.getBasePackageName(), wifiEnabled);
+        if (wifiEnabled) setWifiEnabled(mContext.getBasePackageName(), wifiEnabled);
 
         mWifiWatchdogStateMachine = WifiWatchdogStateMachine.
                makeWifiWatchdogStateMachine(mContext);
@@ -584,13 +584,16 @@ public final class WifiService extends IWifiManager.Stub {
     }
 
     /**
-     * @hide
+     * see {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)}
+     * @param enable {@code true} to enable, {@code false} to disable.
+     * @return {@code true} if the enable/disable operation was
+     *         started or is already in the queue.
      */
-    public synchronized boolean setWifiEnabledInternal(String callingPackage, boolean enable) {
+    public synchronized boolean setWifiEnabled(String callingPackage, boolean enable) {
         enforceChangePermission();
 
         int uid = Binder.getCallingUid();
-        if (callingPackage != null && mAppOps.noteOp(AppOpsManager.OP_WIFI_CHANGE, uid, callingPackage)
+        if (mAppOps.noteOp(AppOpsManager.OP_WIFI_CHANGE, uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
             return false;
         }
@@ -618,16 +621,6 @@ public final class WifiService extends IWifiManager.Stub {
 
         mWifiController.sendMessage(CMD_WIFI_TOGGLED);
         return true;
-    }
-
-    /**
-     * see {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)}
-     * @param enable {@code true} to enable, {@code false} to disable.
-     * @return {@code true} if the enable/disable operation was
-     *         started or is already in the queue.
-     */
-    public boolean setWifiEnabled(boolean enable) {
-        return setWifiEnabledInternal(null, enable);
     }
 
     /**
@@ -901,6 +894,7 @@ public final class WifiService extends IWifiManager.Stub {
         enforceAccessPermission();
         return mWifiStateMachine.getCountryCode();
     }
+
 
     /**
      * Set the operational frequency band
