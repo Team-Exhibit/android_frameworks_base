@@ -43,6 +43,8 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -104,6 +106,8 @@ import android.widget.ScrollView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.beanstalk.ButtonConfig;
@@ -119,6 +123,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.statusbar.powerwidget.PowerWidget;
 
 import com.android.systemui.R;
+import com.android.systemui.ReminderMessageView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -142,6 +147,7 @@ import com.android.systemui.omni.StatusHeaderMachine;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.StringBuilder;
 import java.util.ArrayList;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
@@ -149,7 +155,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
-    public static final boolean DUMPTRUCK = true; // extra dumpsys info
+    public static final boolean DUMPTRUCK = false; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
 
     public static final boolean DEBUG_WINDOW_STATE = false;
@@ -158,6 +164,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // additional instrumentation for testing purposes; intended to be left on during development
     public static final boolean CHATTY = DEBUG;
+
+    private static final String KEY_REMINDER_ACTION =
+            "key_reminder_action";
+
+    private static final String SCHEDULE_REMINDER_NOTIFY =
+            "com.android.systemui.SCHEDULE_REMINDER_NOTIFY";
 
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
@@ -169,6 +181,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private static final int MSG_FLIP_TO_NOTIFICATION_PANEL = 1004;
     private static final int MSG_FLIP_TO_QS_PANEL = 1005;
     private static final int MSG_STATUSBAR_BRIGHTNESS = 1006;
+    private static final int MSG_SMART_PULLDOWN = 1007;
     // 1020-1030 reserved for BaseStatusBar
 
     private static final boolean CLOSE_PANEL_WHEN_EMPTIED = true;
@@ -234,6 +247,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // left-hand icons
     LinearLayout mStatusIcons;
     LinearLayout mCenterClockLayout;
+
     // the icons themselves
     IconMerger mNotificationIcons;
     // [+>
@@ -277,6 +291,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mCarrierAndWifiViewHeight;
     private TextView mEmergencyCallLabel;
     private int mNotificationHeaderHeight;
+
+    // Notification reminder
+    private View mReminderHeader;
+    private ImageView mSpacer;
+    private boolean mReminderEnabled;
+    private int mFlipInterval;
+    private int mReminderTitleLandscapeWidth;
+    private int mReminderTitlePortraitWidth;
+    private int mReminderLandscapeWidth;
+    private int mReminderPortraitWidth;
+    private ViewFlipper mFlipper;
+    private ViewFlipper mFlipperLand;
+    private TextView mTextHolder;
+    private TextView mReminderTitle;
+    private SharedPreferences mShared;
 
     private int mHideLabels;
 
@@ -329,7 +358,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     int[] mAbsPos = new int[2];
     Runnable mPostCollapseCleanup = null;
-    
+
     // status bar brightness control
     private boolean mBrightnessControl;
     private float mScreenWidth;
@@ -504,6 +533,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PIE_CONTROLS), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.REMINDER_ALERT_ENABLED), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.REMINDER_ALERT_INTERVAL), false, this,
+                    UserHandle.USER_ALL);
             update();
         }
 
@@ -625,6 +660,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             updateBatteryIcons();
 	    updateCustomHeaderStatus();
+
+            mFlipInterval = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.REMINDER_ALERT_INTERVAL, 1500, UserHandle.USER_CURRENT);
+
+            boolean reminderHolder = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.REMINDER_ALERT_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
+            if (reminderHolder != mReminderEnabled) {
+                mReminderEnabled = reminderHolder;
+                if (mReminderEnabled) {
+                    if (mShared.getString("title", null) == null) {
+                        mShared.edit().putString("title",
+                                mContext.getResources().getString(
+                                R.string.quick_settings_reminder_help_title)).commit();
+                        mShared.edit().putString("message",
+                                mContext.getResources().getString(
+                                R.string.quick_settings_reminder_help_message)).commit();
+                    }
+                }
+                enableOrDisableReminder();
+            }
         }
     }
 
@@ -644,6 +699,173 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mBattery != null && mCircleBattery != null) {
             mBattery.updateSettings();
             mCircleBattery.updateSettings();
+        }
+    }
+
+    public void updateReminder() {
+        String title = mShared.getString("title", null);
+        String message = mShared.getString("message", null);
+        if (title != null && message != null
+                && (!title.isEmpty() || !message.isEmpty())) {
+            final int dpi = mContext.getResources().getDisplayMetrics().densityDpi;
+            mReminderTitle.setText(title);
+            mFlipper.removeAllViews();
+            ArrayList<String> splitStringPortrait =
+                    splitString(message, mReminderPortraitWidth);
+            for (String split : splitStringPortrait) {
+                ReminderMessageView entry =
+                        new ReminderMessageView(mContext, split);
+                mFlipper.addView(entry);
+            }
+
+            mFlipperLand.removeAllViews();
+            ArrayList<String> splitStringLandscape = mNotificationPanelIsFullScreenWidth ?
+                    splitString(message, mReminderLandscapeWidth) : splitStringPortrait;
+            for (String splitLand : splitStringLandscape) {
+                ReminderMessageView entryLand =
+                        new ReminderMessageView(mContext, splitLand);
+                mFlipperLand.addView(entryLand);
+            }
+
+            toggleReminderFlipper(mExpandedVisible);
+        } else {
+            clearReminder();
+        }
+    }
+
+    private void enableOrDisableReminder() {
+        if (mReminderEnabled) {
+            mSpacer.setEnabled(true);
+            mReminderHeader.setVisibility(View.VISIBLE);
+            mReminderHeader.setEnabled(true);
+            toggleVisibleFlipper();
+            updateReminder();
+        } else {
+            mSpacer.setEnabled(false);
+            clearReminder();
+        }
+    }
+
+    private void clearReminder() {
+        mReminderHeader.setVisibility(View.GONE);
+        mReminderHeader.setEnabled(false);
+        mReminderTitle.setText(null);
+        mFlipper.removeAllViews();
+        mFlipperLand.removeAllViews();
+    }
+
+    private void setTakenSpace() {
+        if (mNotificationPanelIsFullScreenWidth) {
+            if (mCurrentDisplaySize.x > mCurrentDisplaySize.y) {
+                mReminderTitlePortraitWidth = (mCurrentDisplaySize.y / 4);
+                mReminderTitleLandscapeWidth = (mCurrentDisplaySize.x / 4);
+                mReminderPortraitWidth = mReminderTitlePortraitWidth * 2;
+                mReminderLandscapeWidth = mReminderTitleLandscapeWidth * 2;
+            } else {
+                mReminderTitlePortraitWidth = (mCurrentDisplaySize.x / 4);
+                mReminderTitleLandscapeWidth = (mCurrentDisplaySize.y / 4);
+                mReminderPortraitWidth = mReminderTitlePortraitWidth * 2;
+                mReminderLandscapeWidth = mReminderTitleLandscapeWidth * 2;
+            }
+        } else {
+            mReminderTitlePortraitWidth = (mNotificationPanel.getLayoutParams().width / 4);
+            mReminderTitleLandscapeWidth = mReminderTitlePortraitWidth;
+            mReminderLandscapeWidth = mReminderTitleLandscapeWidth * 2;
+            mReminderPortraitWidth = mReminderLandscapeWidth;
+        }
+        enableOrDisableReminder();
+    }
+
+    private ArrayList<String>splitString(String message, int maxWidth) {
+        ArrayList<String> split = new ArrayList<String>();
+        String[] parts = message.split("\\s+");
+        String combined = "";
+        for (int i = 0; i < parts.length; i++) {
+            if (combined.equals("") ? acceptableLength(parts[i], maxWidth)
+                    : acceptableLength(parts[i] + combined + " ", maxWidth)) {
+                if (combined.equals("")) {
+                    combined = parts[i];
+                } else {
+                    combined += " " + parts[i];
+                }
+            } else {
+                if (!combined.equals("")) {
+                    split.add(combined);
+                    combined = "";
+                }
+                if (!acceptableLength(parts[i], maxWidth)) {
+                    StringBuilder builder = new StringBuilder();
+                    int index = 0;
+                    for (int j = 0; j < parts[i].length(); j++) {
+                        if (!acceptableLength(parts[i].substring(index, j) + "...", maxWidth)) {
+                            split.add(builder.toString() + "...");
+                            builder.setLength(0);
+                            index = j;
+                            --j;
+                        } else {
+                            builder.append(parts[i].charAt(j));
+                        }
+                    }
+                    if (builder.length() > 0) {
+                        combined = builder.toString();
+                    }
+                } else {
+                    // Just re-reun this, we've added all previous strings up already
+                    --i;
+                }
+            }
+        }
+        if (!combined.equals("")) {
+            split.add(combined);
+        }
+        // Just a blank roll at the end to quickly see the message is over
+        split.add("");
+        return split;
+    }
+
+    private boolean acceptableLength(String input, int maxWidth) {
+        mTextHolder.setText(input);
+        mTextHolder.measure(0, 0);
+        return mTextHolder.getMeasuredWidth() < maxWidth;
+    }
+
+    public void toggleReminderFlipper(boolean active) {
+        if (mReminderEnabled) {
+            if (mCurrOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if (mFlipperLand != null && mFlipper != null) {
+                    mReminderTitle.setWidth(mReminderTitleLandscapeWidth);
+                    mFlipper.stopFlipping();
+                    if (mFlipperLand.getChildCount() <= 2 || !active) {
+                        mFlipperLand.setDisplayedChild(0);
+                        mFlipperLand.stopFlipping();
+                    } else {
+                        mFlipperLand.setFlipInterval(mFlipInterval);
+                        mFlipperLand.startFlipping();
+                    }
+                }
+            } else {
+                if (mFlipper != null && mFlipperLand != null) {
+                    mReminderTitle.setWidth(mReminderTitlePortraitWidth);
+                    mFlipperLand.stopFlipping();
+                    if (mFlipper.getChildCount() <= 2 || !active) {
+                        mFlipper.setDisplayedChild(0);
+                        mFlipper.stopFlipping();
+                    } else {
+                        mFlipper.setFlipInterval(mFlipInterval);
+                        mFlipper.startFlipping();
+                    }
+                }
+            }
+        }
+    }
+
+    private void toggleVisibleFlipper() {
+        if (mCurrOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mFlipper.setVisibility(View.GONE);
+            mFlipperLand.setVisibility(View.VISIBLE);
+        } else {
+            mFlipper.setVisibility(View.VISIBLE);
+            mFlipperLand.setVisibility(View.GONE);
         }
     }
 
@@ -761,6 +983,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mMinBrightness = context.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessDim);
 
+        mCurrOrientation = res.getConfiguration().orientation;
+
         updateDisplaySize(); // populates mDisplayMetrics
         loadDimens();
 
@@ -840,7 +1064,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mRecreating) {
         } else {
             addActiveDisplayView();
-            /* ChaosLab: GestureAnywhere - BEGIN */
             addGestureAnywhereView();
             /* ChaosLab: GestureAnywhere - END */
         }
@@ -873,6 +1096,36 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mStatusHeaderMachine = new StatusHeaderMachine(mContext);
         updateCustomHeaderStatus();
+
+        mReminderHeader = mStatusBarWindow.findViewById(R.id.reminder_header);
+        mReminderHeader.setOnClickListener(mReminderButtonListener);
+        mReminderHeader.setOnLongClickListener(mReminderLongButtonListener);
+
+        mSpacer = (ImageView) mNotificationPanelHeader.findViewById(R.id.spacer);
+        mSpacer.setOnClickListener(mReminderButtonListener);
+        mSpacer.setOnLongClickListener(mReminderLongButtonListener);
+
+        mReminderTitle = (TextView) mReminderHeader.findViewById(R.id.title);
+
+        mFlipper = (ViewFlipper) mReminderHeader.findViewById(R.id.message);
+        mFlipper.setSelfMaintained(true);
+
+        mFlipperLand = (ViewFlipper) mReminderHeader.findViewById(R.id.message_land);
+        mFlipperLand.setSelfMaintained(true);
+
+        mReminderEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.REMINDER_ALERT_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
+
+        View view = View.inflate(mContext, R.layout.reminder_entry, null);
+        mTextHolder = (TextView) view.findViewById(R.id.message_content);
+
+        mFlipInterval = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.REMINDER_ALERT_INTERVAL, 1500, UserHandle.USER_CURRENT);
+
+        mShared = mContext.getSharedPreferences(
+                    KEY_REMINDER_ACTION, Context.MODE_PRIVATE);
+
+        setTakenSpace();
 
         mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
@@ -1164,6 +1417,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(ACTION_DEMO);
+        filter.addAction(SCHEDULE_REMINDER_NOTIFY);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         // receive broadcasts for app actions
@@ -2575,6 +2829,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Close any "App info" popups that might have snuck on-screen
         dismissPopups();
 
+        toggleReminderFlipper(false);
+
         if (mPostCollapseCleanup != null) {
             mPostCollapseCleanup.run();
             mPostCollapseCleanup = null;
@@ -2919,6 +3175,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override  // CommandQueue
+    public void toggleSmartPulldown() {
+        int smartPulldownMode = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_SMART_PULLDOWN,
+                0, UserHandle.USER_CURRENT);
+        if (smartPulldownMode == 1 && !hasClearableNotifications()) {
+            toggleQSShade();
+        } else if (smartPulldownMode == 2 && !hasVisibleNotifications()) {
+            toggleQSShade();
+        } else if (smartPulldownMode == 0) {
+            Toast.makeText(mContext,
+                    R.string.smart_pulldown_disabled,
+                    Toast.LENGTH_LONG).show();
+        } else {
+            toggleNotificationShade();
+        }
+        mHandler.removeMessages(MSG_SMART_PULLDOWN);
+        mHandler.sendEmptyMessage(MSG_SMART_PULLDOWN);
     }
 
     private int computeBarMode(int oldVis, int newVis, BarTransitions transitions,
@@ -3460,6 +3736,27 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         animateCollapsePanels();
     }
 
+    private View.OnClickListener mReminderButtonListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            startActivityDismissingKeyguard(new Intent(
+                    "com.android.systemui.timedialog.ReminderTimeDialog"), true);
+        }
+    };
+
+    private View.OnLongClickListener mReminderLongButtonListener = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+             String message = mShared.getString("message", null);
+             if (message != null) {
+                Intent intent = new Intent(
+                        "com.android.systemui.timedialog.ReminderTimeDialog");
+                intent.putExtra("clear", true);
+                startActivityDismissingKeyguard(intent, true);
+            }
+            return true;
+        }
+    };
+
     private View.OnClickListener mSettingsButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
             if (mHasSettingsPanel) {
@@ -3574,6 +3871,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
                 repositionNavigationBar();
                 notifyNavigationBarScreenOn(true);
+            } else if (SCHEDULE_REMINDER_NOTIFY.equals(action)) {
+                updateAndNotifyReminder();
             } else if (ACTION_DEMO.equals(action)) {
                 Bundle bundle = intent.getExtras();
                 if (bundle != null) {
@@ -3637,6 +3936,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         animateCollapsePanels();
         updateNotificationIcons();
         resetUserSetupObserver();
+    }
+
+    private void updateAndNotifyReminder() {
+        boolean reminderActive = mShared.getBoolean("scheduled", false);
+        if (!reminderActive) {
+            mShared.edit().putBoolean("scheduled", true).commit();
+            enableOrDisableReminder();
+        } else {
+            if (mReminderEnabled) {
+                Intent notify = new Intent();
+                notify.setAction("com.android.systemui.POST_REMINDER_NOTIFY");
+                mContext.sendBroadcast(notify);
+            }
+            // Just clear the reminder.  Let the user decide not to dismiss the
+            // notification, and if they don't the reminder will exist on reboot.
+            clearReminder();
+        }
     }
 
     private void updateSwapXY() {
@@ -3740,6 +4056,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         repositionNavigationBar();
 
+        rebuildRecentsScreen();
+
         // recreate StatusBarIconViews.
         for (int i = 0; i < nIcons; i++) {
             StatusBarIcon icon = icons.get(i);
@@ -3791,6 +4109,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             // Update the settings container
             if (mSettingsContainer != null) {
                 mSettingsContainer.updateResources();
+            }
+
+            if (mReminderEnabled) {
+                toggleVisibleFlipper();
+                if (mExpandedVisible) {
+                    // Reset to first view since we're expanded and start flipping again
+                    toggleReminderFlipper(true);
+                }
             }
         } else {
             if (mQS != null) {

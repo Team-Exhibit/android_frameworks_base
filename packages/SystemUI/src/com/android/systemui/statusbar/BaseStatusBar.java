@@ -59,6 +59,7 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuffXfermode;
@@ -113,16 +114,17 @@ import com.android.systemui.statusbar.phone.Ticker;
 import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.internal.util.beanstalk.DeviceUtils;
 import com.android.systemui.R;
-import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
+import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.halo.Halo;
+import com.android.systemui.slimrecent.RecentController;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.phone.NavigationBarOverlay;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
-import com.android.systemui.statusbar.policy.activedisplay.ActiveDisplayView;
 import com.android.systemui.statusbar.policy.PieController;
+import com.android.systemui.statusbar.policy.activedisplay.ActiveDisplayView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -178,6 +180,10 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected SearchPanelView mSearchPanelView;
 
     protected PopupMenu mNotificationBlamePopup;
+
+    private RecentController cRecents;
+
+    private RecentsComponent mRecents;
 
     protected int mCurrentUserId = 0;
 
@@ -248,9 +254,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private boolean mDeviceProvisioned = false;
 
-    private RecentsComponent mRecents;
-
-    protected ActiveDisplayView mActiveDisplayView;
+    private boolean mCustomRecent = false;
 
     @ChaosLab(name="GestureAnywhere", classification=Classification.NEW_FIELD)
     protected GestureAnywhereView mGestureAnywhereView;
@@ -269,6 +273,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private ActivityManager mActivityManager;
 
+    protected ActiveDisplayView mActiveDisplayView;
+
     public IStatusBarService getStatusBarService() {
         return mBarService;
     }
@@ -277,7 +283,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return mDeviceProvisioned;
     }
 
-    private ContentObserver mProvisioningObserver = new ContentObserver(mHandler) {
+    private ContentObserver mProvisioningObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             final boolean provisioned = 0 != Settings.Global.getInt(
@@ -364,7 +370,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
-        mRecents = getComponent(RecentsComponent.class);
+        mCustomRecent = Settings.System.getBoolean(
+                        mContext.getContentResolver(), Settings.System.CUSTOM_RECENT, false);
+
+        if(mCustomRecent){
+            cRecents = new RecentController(mContext);
+        }else{
+            mRecents = getComponent(RecentsComponent.class);
+        }
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
@@ -889,27 +902,54 @@ public abstract class BaseStatusBar extends SystemUI implements
     };
 
     protected void toggleRecentsActivity() {
-        if (mRecents != null) {
+        if (mRecents != null || cRecents != null) {
+        mCustomRecent = Settings.System.getBoolean(mContext.getContentResolver(), 
+                        Settings.System.CUSTOM_RECENT, false);
+	if(mCustomRecent)
+            cRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
+        else
             mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
         }
     }
 
     protected void preloadRecentTasksList() {
-        if (mRecents != null) {
+        if (mRecents != null || cRecents != null) {
+        mCustomRecent = Settings.System.getBoolean(mContext.getContentResolver(), 
+                        Settings.System.CUSTOM_RECENT, false);
+        if(mCustomRecent)
+            cRecents.preloadRecentTasksList();
+        else
             mRecents.preloadRecentTasksList();
         }
     }
 
     protected void cancelPreloadingRecentTasksList() {
-        if (mRecents != null) {
+        if (mRecents != null || cRecents != null) {
+        mCustomRecent = Settings.System.getBoolean(mContext.getContentResolver(), 
+                        Settings.System.CUSTOM_RECENT, false);
+        if(mCustomRecent)
+            cRecents.cancelPreloadingRecentTasksList();
+        else
             mRecents.cancelPreloadingRecentTasksList();
         }
     }
 
     protected void closeRecents() {
-        if (mRecents != null) {
+        if (mRecents != null || cRecents != null) {
+        mCustomRecent = Settings.System.getBoolean(mContext.getContentResolver(), 
+                        Settings.System.CUSTOM_RECENT, false);
+        if(mCustomRecent)
+            cRecents.closeRecents();
+        else
             mRecents.closeRecents();
         }
+    }
+
+    protected void rebuildRecentsScreen() {
+        mCustomRecent = Settings.System.getBoolean(mContext.getContentResolver(), 
+                        Settings.System.CUSTOM_RECENT, false);
+        if (cRecents != null && mCustomRecent)   
+                cRecents.rebuildRecentsScreen();
     }
 
     public abstract void resetHeadsUpDecayTimer();
@@ -1804,6 +1844,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    protected static void setSystemUIVisibility(View v, int visibility) {
+        v.setSystemUiVisibility(visibility);
+    }
+
     protected void addActiveDisplayView() {
         mActiveDisplayView = (ActiveDisplayView)View.inflate(mContext, R.layout.active_display, null);
         mActiveDisplayView.setStatusBar(this);
@@ -1822,14 +1866,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 0
                 | WindowManager.LayoutParams.FLAG_FULLSCREEN
-                | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
-                PixelFormat.OPAQUE);
+                  | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                  | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                  | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                  | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                  | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                  | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                  | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
+                  PixelFormat.OPAQUE);
         if (ActivityManager.isHighEndGfx()) {
             lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         }

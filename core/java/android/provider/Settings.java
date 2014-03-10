@@ -2656,6 +2656,27 @@ public final class Settings {
         public static final String TILE_CONTACT_ACTIONS = "tile_contact_actions";
 
         /**
+         * Reminder alert on / off
+         * @hide
+         */
+        public static final String REMINDER_ALERT_ENABLED = "reminder_alert_enabled";
+
+        /**
+         * Reminder alert extras
+         *  0 = no alert
+         *  1 = alert rings once
+         *  2 = alert rings until dismissed
+         * @hide
+         */
+        public static final String REMINDER_ALERT_NOTIFY = "reminder_alert_notify";
+
+        /**
+         * Reminder alert ringer
+         * @hide
+         */
+        public static final String REMINDER_ALERT_RINGER = "reminder_alert_ringer";
+
+        /**
          * Show icon when stylus is used?
          * 0 = no
          * 1 = yes
@@ -2776,7 +2797,19 @@ public final class Settings {
          */
         public static final String ACTIVE_DISPLAY_SUNLIGHT_MODE = "active_display_sunlight_mode";
 
-	/**
+        /**
+         * Whether to turn off the device when gets pocketed again and was waked up by active display
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_TURNOFF_MODE = "active_display_turnoff_mode";
+
+        /**
+         * Threshold of the proximity sensor to turn on the device.
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_THRESHOLD = "active_display_threshold";
+
+        /**
          * Timeout of the display when there is no user interaction
          * @hide
          */
@@ -2906,6 +2939,20 @@ public final class Settings {
          */
         @ChaosLab(name="GestureAnywhere", classification=Classification.NEW_FIELD)
         public static final String GESTURE_ANYWHERE_SHOW_TRIGGER = "gesture_anywhere_show_trigger";
+
+        /**
+         * Whether to display the gesture anywhere trigger region or not.
+         * @hide
+         */
+        @ChaosLab(name="Identicons", classification=Classification.NEW_FIELD)
+        public static final String IDENTICONS_ENABLED = "identicons_enabled";
+
+        /**
+         * Identicons style setting.
+         * @hide
+         */
+        @ChaosLab(name="Identicons", classification=Classification.NEW_FIELD)
+        public static final String IDENTICONS_STYLE = "identicons_style";
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
@@ -3585,6 +3632,12 @@ public final class Settings {
         public static final String START_SCREEN_STATE_SERVICE = "start_screen_state_service";
 
         /**
+         * Reminder alert flip interval
+         * @hide
+         */
+        public static final String REMINDER_ALERT_INTERVAL = "reminder_alert_interval";
+
+        /**
          * @hide
          */
         public static final String SCREEN_STATE_TWOG = "screen_state_twog";
@@ -3719,6 +3772,13 @@ public final class Settings {
          *  @hide
          */
         public static final String SHOW_GB_RAMBAR = "show_gb_rambar";
+
+        /**
+         * Custom Recent Control
+         *
+         * @hide
+         */
+        public static final String CUSTOM_RECENT = "custom_recent";
 
         /**
          * Show clear all recents button
@@ -4213,14 +4273,15 @@ public final class Settings {
         public static final String[] ACTIVITY_ANIMATION_CONTROLS = new String[] {  
                 "activity_open",
                 "activity_close",
-                "task_open",  
-                "task_close",  
+                "task_open",
+                "task_close",
                 "task_to_front",
-                "task_to_back",  
-                "wallpaper_open",  
-                "wallpaper_close",  
-                "wallpaper_intra_open",  
-                "wallpaper_intra_close",  
+                "task_to_back",
+                "wallpaper_open",
+                "wallpaper_close",
+                "wallpaper_intra_open",
+                "wallpaper_intra_close",
+		"toast_animation",
         };  
         public static final String ANIMATION_CONTROLS_DURATION = "animation_controls_duration";
         public static final String ANIMATION_CONTROLS_NO_OVERRIDE = "animation_controls_no_override";
@@ -4254,18 +4315,6 @@ public final class Settings {
          * @hide
          */
         public static final String SYSTEM_POWER_CRT_MODE = "system_power_crt_mode";
-
-	/**
-         * Whether to turn off the device when gets pocketed again and was waked up by active display
-         * @hide
-         */
-        public static final String ACTIVE_DISPLAY_TURNOFF_MODE = "active_display_turnoff_mode";
-
-        /**
-         * Threshold of the proximity sensor to turn on the device.
-         * @hide
-         */
-        public static final String ACTIVE_DISPLAY_THRESHOLD = "active_display_threshold";
 
         /**
          * Circle battery icon color
@@ -4617,6 +4666,18 @@ public final class Settings {
         public static final String LOCKSCREEN_BLUR_RADIUS = "lockscreen_blur_radius";
 
         /**
+         * Sets the lockscreen background style
+         * @hide
+         */
+        public static final String LOCKSCREEN_BACKGROUND_STYLE = "lockscreen_background_style";
+
+        /**
+         * Color for lockscreen background when set to color fill
+         * @hide
+         */
+        public static final String LOCKSCREEN_BACKGROUND_COLOR = "lockscreen_background_color";
+
+        /**
          * Should call status sounds be player
          *
          * @hide
@@ -4661,6 +4722,36 @@ public final class Settings {
          * @hide
          */
         public static final String ENABLE_FAST_TORCH = "enable_fast_torch";
+
+        /**
+         *
+         * @hide
+         */
+        public static final String ANIMATION_CONTROLS_NO_SCROLL = "animation_controls_no_scroll";
+
+        /**
+         * Determine custom scroll friction.
+         * @hide
+         */
+        public static final String CUSTOM_SCROLL_FRICTION = "custom_scroll_friction";
+
+        /**
+         * Determine custom fling velocity.
+         * @hide
+         */
+        public static final String CUSTOM_FLING_VELOCITY = "custom_fling_velocity";
+
+        /**
+         * Determine custom overscroll distance.
+         * @hide
+         */
+        public static final String CUSTOM_OVERSCROLL_DISTANCE = "custom_overscroll_distance";
+
+        /**
+         * Determine custom overfling distance.
+         * @hide
+         */
+        public static final String CUSTOM_OVERFLING_DISTANCE = "custom_overfling_distance";
 
         /**
          * @hide
@@ -8459,6 +8550,9 @@ public final class Settings {
                 BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX = "bluetooth_a2dp_sink_priority_";
         /** {@hide} */
         public static final String
+                BLUETOOTH_LAST_CONNECTED_A2DP_SEP_TYPE = "bluetooth_last_connected_a2dp_sep_type_";
+        /** {@hide} */
+        public static final String
                 BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX = "bluetooth_input_device_priority_";
         /** {@hide} */
         public static final String
@@ -8478,6 +8572,14 @@ public final class Settings {
          */
         public static final String getBluetoothA2dpSinkPriorityKey(String address) {
             return BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+        }
+
+        /**
+         * Get the key that retrieves a bluetooth last connected a2dp profile.
+         * @hide
+         */
+        public static final String getBluetoothLastConnectedA2dpSepTypeKey(String address) {
+            return BLUETOOTH_LAST_CONNECTED_A2DP_SEP_TYPE + address.toUpperCase(Locale.ROOT);
         }
 
         /**

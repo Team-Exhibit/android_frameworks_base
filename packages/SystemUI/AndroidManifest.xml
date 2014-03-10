@@ -88,15 +88,15 @@
     <!-- Reboot -->
     <uses-permission android:name="android.permission.REBOOT" />
 
-    <!-- Active display -->
-    <uses-permission android:name="android.permission.SYSTEM_NOTIFICATION_LISTENER" />
-
     <!-- Development shortcut -->
     <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
     <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
 
     <!-- Record Audio QuickRecord -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Active display -->
+    <uses-permission android:name="android.permission.SYSTEM_NOTIFICATION_LISTENER" />
 
     <application
         android:persistent="true"
@@ -139,6 +139,8 @@
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
 
+        <service android:name=".service.ReminderService"/>
+
         <receiver android:name=".BootReceiver" androidprv:primaryUserOnly="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -147,6 +149,12 @@
 
         <receiver android:name=".screenshot.TrashScreenshot"
                 android:exported="true" />
+
+        <receiver android:name=".ReminderReceiver">
+            <intent-filter>
+                <action android:name="com.android.systemui.POST_REMINDER_NOTIFY"/>
+            </intent-filter>
+        </receiver>
 
         <activity android:name=".usb.UsbStorageActivity"
                   android:label="@*android:string/usb_storage_activity_title"
@@ -157,7 +165,7 @@
                 android:excludeFromRecents="true">
         </activity>
 
-        <activity android:name=".recent.RecentsActivity"
+	<activity android:name=".recent.RecentsActivity"
                 android:label="@string/accessibility_desc_recent_apps"
                 android:theme="@style/RecentsStyle"
                 android:excludeFromRecents="true"
@@ -242,6 +250,20 @@
             android:launchMode="singleInstance" >
             <intent-filter>
                 <action android:name="com.android.systemui.timedialog.MusicTileTimeDialog" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Reminder dialog sets -->
+        <activity
+            android:name="com.android.systemui.timedialog.ReminderTimeDialog"
+            android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:excludeFromRecents="true"
+            android:taskAffinity="com.android.systemui.timedialog.ReminderTimeDialog"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="com.android.systemui.timedialog.ReminderTimeDialog" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -443,6 +465,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="com.android.systemui.Transparent"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <activity android:name=".statusbar.policy.activedisplay.DummyActivity"
                   android:label=""
                   android:taskAffinity=""
@@ -450,9 +475,6 @@
                   android:exported="true"
                   android:theme="@style/Theme.DummyActivity">
         </activity>
-
-        <activity android:name="com.android.systemui.Transparent"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
     </application>
 </manifest>
