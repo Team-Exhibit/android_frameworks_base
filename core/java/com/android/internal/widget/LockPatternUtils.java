@@ -26,6 +26,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.gesture.Gesture;
@@ -1032,7 +1033,11 @@ public class LockPatternUtils {
         // Check that it's installed
         PackageManager pm = mContext.getPackageManager();
         try {
-            pm.getPackageInfo("com.android.facelock", PackageManager.GET_ACTIVITIES);
+            PackageInfo pi = pm.getPackageInfo("com.android.facelock",
+                    PackageManager.GET_ACTIVITIES);
+            if (!pi.applicationInfo.enabled) {
+                return false;
+            }
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
@@ -1470,6 +1475,14 @@ public class LockPatternUtils {
             button.setCompoundDrawablesWithIntrinsicBounds(emergencyIcon, 0, 0, 0);
         }
         button.setText(textId);
+
+        int textColor = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCKSCREEN_MISC_COLOR, -2,
+                UserHandle.USER_CURRENT);
+        if (textColor != -2) {
+            button.setTextColor(textColor);
+        }
     }
 
     /**

@@ -2875,6 +2875,13 @@ public final class Settings {
                 "lockscreen_use_widget_container_carousel";
 
         /**
+         * Whether to hide the frame behind lockscreen widgets
+         * @hide
+         */
+        public static final String LOCKSCREEN_WIDGET_FRAME_ENABLED =
+                "lockscreen_widget_frame_enabled";
+
+        /**
          * Whether double-tap and hold on the lock glowpad starts the torch
          * @hide
          */
@@ -3279,6 +3286,13 @@ public final class Settings {
         public static final String ENABLE_FORWARD_LOOKUP = "enable_forward_lookup";
 
         /**
+         * Enable looking up of phone numbers of people
+         *
+         * @hide
+         */
+        public static final String ENABLE_PEOPLE_LOOKUP = "enable_people_lookup";
+
+        /**
          * Enable looking up of information of phone numbers not in the contacts
          *
          * @hide
@@ -3291,6 +3305,13 @@ public final class Settings {
          * @hide
          */
         public static final String FORWARD_LOOKUP_PROVIDER = "forward_lookup_provider";
+
+        /**
+         * The people lookup provider
+         *
+         * @hide
+         */
+        public static final String PEOPLE_LOOKUP_PROVIDER = "people_lookup_provider";
 
         /**
          * The reverse lookup provider
@@ -4125,6 +4146,12 @@ public final class Settings {
           */
          public static final String SWAP_VOLUME_KEYS_ON_ROTATION = "swap_volume_keys_on_rotation";
 
+        /**
+         * Disable FC Notifications
+         * @hide
+         */
+        public static final String DISABLE_FC_NOTIFICATIONS = "disable_fc_notifications";
+
          /**
           * Volume keys control cursor in text fields (default is 0)
           * 0 - Disabled
@@ -4767,7 +4794,12 @@ public final class Settings {
         public static final String NOTIFICATION_HIDE_LABELS = "notification_hide_labels";
 
         /**
-         * Width and height of output vide expressed in WxH
+         * Whether quiet hours will enable or disable themselves on volume change
+         * @hide
+         */
+        public static final String QUIET_HOURS_AUTOMATIC = "quiet_hours_automatic";
+
+        /**
          * @hide
          */
         public static final String SCREEN_RECORDER_OUTPUT_DIMENSIONS = "screen_recorder_output_dimensions";
@@ -5074,6 +5106,24 @@ public final class Settings {
          * @hide
          */
         public static final String RECENTS_PANEL_COLOR = "recents_panel_color";
+
+        /**
+         * Whether recent panel gravity is left or right (default = Gravity.RIGHT).
+         * @hide
+         */
+        public static final String RECENT_PANEL_GRAVITY = "recent_panel_gravity";
+
+        /**
+         * Size of recent panel view in percent (default = 100).
+         * @hide
+         */
+        public static final String RECENT_PANEL_SCALE_FACTOR = "recent_panel_scale_factor";
+
+        /**
+         * User favorite tasks for recent panel.
+         * @hide
+         */
+        public static final String RECENT_PANEL_FAVORITES = "recent_panel_favorites";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -6189,6 +6239,18 @@ public final class Settings {
          * @hide
          */
         public static final String LOCKSCREEN_FRAME_COLOR = "lockscreen_frame_color";
+
+        /**
+         * Lockscreen widget add, glowpad ring, text, failed pattern ring colors
+         * @hide
+         */
+        public static final String LOCKSCREEN_MISC_COLOR = "lockscreen_misc_color";
+
+        /**
+         * Lockscreen targets and pattern ring colors
+         * @hide
+         */
+        public static final String LOCKSCREEN_TARGETS_COLOR = "lockscreen_targets_color";
 
         /**
          *Whether lock before unlock is enabled or disabled

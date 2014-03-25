@@ -534,6 +534,9 @@ public class AudioService extends IAudioService.Stub {
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
 
+        mLinkNotificationWithVolume = Settings.System.getIntForUser(mContentResolver,
+                Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
+
         // must be called before readPersistedSettings() which needs a valid mStreamVolumeAlias[]
         // array initialized by updateStreamVolumeAlias()
         updateStreamVolumeAlias(false /*updateVolumes*/);
@@ -828,9 +831,6 @@ public class AudioService extends IAudioService.Stub {
             mVolumeKeysControlRingStream = Settings.System.getIntForUser(cr,
                     Settings.System.VOLUME_KEYS_CONTROL_RING_STREAM, 1, UserHandle.USER_CURRENT) == 1;
         }
-
-        mLinkNotificationWithVolume = Settings.System.getIntForUser(cr,
-                Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
 
         mMuteAffectedStreams = System.getIntForUser(cr,
                 System.MUTE_STREAMS_AFFECTED,
@@ -1135,8 +1135,6 @@ public class AudioService extends IAudioService.Stub {
 
             oldIndex = streamState.getIndex(device);
 
-            index = rescaleIndex(index * 10, streamType, streamTypeAlias);
-
             if (streamTypeAlias == AudioSystem.STREAM_MUSIC &&
                 (device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
                 (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
@@ -1146,6 +1144,8 @@ public class AudioService extends IAudioService.Stub {
                     }
                 }
             }
+
+            index = rescaleIndex(index * 10, streamType, streamTypeAlias);
 
             flags &= ~AudioManager.FLAG_FIXED_VOLUME;
             if ((streamTypeAlias == AudioSystem.STREAM_MUSIC) &&
