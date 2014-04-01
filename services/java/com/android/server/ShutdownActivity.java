@@ -52,7 +52,8 @@ public class ShutdownActivity extends Activity {
                     if (mReboot) {
                         pm.reboot(mConfirm, null, false);
                     } else {
-                        pm.shutdown(mConfirm, false);
+			//TODO: figure out who is firing in here to shutdown codinalte!
+                        pm.shutdown(true, false);
                     }
                 } catch (RemoteException e) {
                 }
