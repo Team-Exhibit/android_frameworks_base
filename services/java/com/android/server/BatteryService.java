@@ -46,6 +46,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -86,7 +87,7 @@ import java.io.PrintWriter;
 public final class BatteryService extends Binder {
     private static final String TAG = BatteryService.class.getSimpleName();
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final int BATTERY_SCALE = 100;    // battery capacity is a percentage
 
@@ -261,6 +262,7 @@ public final class BatteryService extends Binder {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+		    Log.e(TAG, "Shutdown attempt due to battery level="+ String.valueOf(mBatteryProps.batteryLevel));
                     if (ActivityManagerNative.isSystemReady()) {
                         Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
                         intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
@@ -280,6 +282,7 @@ public final class BatteryService extends Binder {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+		    Log.e(TAG, "Shutdown attempt due to battery temp="+ String.valueOf(mBatteryProps.batteryTemperature));
                     if (ActivityManagerNative.isSystemReady()) {
                         Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
                         intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
