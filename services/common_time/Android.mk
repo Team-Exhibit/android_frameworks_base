@@ -18,7 +18,7 @@ LOCAL_SRC_FILES := \
     utils.cpp
 
 # Uncomment to enable vesbose logging and debug service.
-#TIME_SERVICE_DEBUG=true
+TIME_SERVICE_DEBUG=true
 ifeq ($(TIME_SERVICE_DEBUG), true)
 LOCAL_SRC_FILES += diag_thread.cpp
 LOCAL_CFLAGS += -DTIME_SERVICE_DEBUG
