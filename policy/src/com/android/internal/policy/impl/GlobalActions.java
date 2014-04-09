@@ -28,6 +28,7 @@ import android.app.Dialog;
 import android.app.Profile;
 import android.app.ProfileManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
@@ -76,18 +77,18 @@ import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.internal.app.ThemeUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.android.internal.app.ThemeUtils;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.beanstalk.ButtonConfig;
 import com.android.internal.util.beanstalk.ImageHelper;
 import com.android.internal.util.beanstalk.PolicyConstants;
 import com.android.internal.util.beanstalk.PolicyHelper;
 import com.android.internal.util.beanstalk.SlimActions;
+import com.android.internal.util.beanstalk.NamelessActions;
 
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that
@@ -154,13 +155,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
 	ThemeUtils.registerThemeChangeReceiver(context, mThemeChangeReceiver);
 
+        ConnectivityManager cm = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mHasTelephony = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+
         // get notified of phone state changes
         TelephonyManager telephonyManager =
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
-        ConnectivityManager cm = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mHasTelephony = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
@@ -264,7 +266,35 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
 	final ContentResolver cr = mContext.getContentResolver();
 
-        // bug report, if enabled
+        // next: On-The-Go, if enabled
+        boolean showOnTheGo = Settings.System.getBoolean(mContext.getContentResolver(),
+                Settings.System.POWER_MENU_ONTHEGO_ENABLED, false);
+        if (showOnTheGo) {
+            mItems.add(
+                new SinglePressAction(com.android.internal.R.drawable.ic_lock_onthego,
+                        R.string.global_action_onthego) {
+
+                        public void onPress() {
+                            NamelessActions.processAction(mContext,
+                                    NamelessActions.ACTION_ONTHEGO_TOGGLE);
+                        }
+
+                        public boolean onLongPress() {
+                            return false;
+                        }
+
+                        public boolean showDuringKeyguard() {
+                            return true;
+                        }
+
+                        public boolean showBeforeProvisioning() {
+                            return true;
+                        }
+                    }
+            );
+        }
+
+        // next: bug report, if enabled
         if (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
             mItems.add(
@@ -740,6 +770,15 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
             mContext.registerReceiver(mRingerModeReceiver, filter);
         }
+    }
+
+    private void startOnTheGo() {
+        final ComponentName cn = new ComponentName("com.android.systemui",
+                "com.android.systemui.beanstalk.onthego.OnTheGoService");
+        final Intent startIntent = new Intent();
+        startIntent.setComponent(cn);
+        startIntent.setAction("start");
+        mContext.startService(startIntent);
     }
 
     private void refreshSilentMode() {

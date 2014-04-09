@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.nfc.NfcAdapter;
 import android.os.Vibrator;
@@ -18,21 +17,13 @@ import android.util.Log;
 
 import com.android.internal.telephony.PhoneConstants;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DeviceUtils {
 
     private static final String SETTINGS_METADATA_NAME = "com.android.settings";
-
-    /** Extract the color into RGB instead ARGB **/
-    public static int extractRGB(int color) {
-        return color & 0x00FFFFFF;
-    }
-
-    public static int extractAlpha(int color) {
-        return (color >> 24) & 0x000000FF;
-    }
 
     // Device types
     private static final int DEVICE_PHONE  = 0;
@@ -162,6 +153,14 @@ public class DeviceUtils {
 
     public static boolean isTablet(Context con) {
         return getScreenType(con) == DEVICE_TABLET;
+    }
+
+    public static boolean fchargeEnabled(Context con) {
+        String fchargePath = con.getString(com.android.internal.R.string.config_fastChargePath);
+        if (fchargePath == null || fchargePath.isEmpty() || !new File(fchargePath).exists()) {
+            return false;
+        }
+        return true;
     }
 
 }

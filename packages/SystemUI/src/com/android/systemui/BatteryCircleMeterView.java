@@ -93,9 +93,6 @@ public class BatteryCircleMeterView extends ImageView {
     private int mCircleTextChargingColor;
     private int mCircleAnimSpeed;
 
-    private boolean mCustomColor;
-    private int systemColor;
-
     // runnable to invalidate view via mHandler.postDelayed() call
     private final Runnable mInvalidate = new Runnable() {
         public void run() {
@@ -249,11 +246,7 @@ public class BatteryCircleMeterView extends ImageView {
             } else if (mIsCharging) {
                 mPaintFont.setColor(mCircleTextChargingColor);
             } else {
-                if (mCustomColor) {
-                    mPaintFont.setColor(systemColor);
-                } else {
-                    mPaintFont.setColor(mCircleTextColor);
-                }
+                mPaintFont.setColor(mCircleTextColor);
             }
             canvas.drawText(Integer.toString(level), textX, mTextY, mPaintFont);
         }
@@ -295,10 +288,6 @@ public class BatteryCircleMeterView extends ImageView {
         mCircleAnimSpeed = Settings.System.getIntForUser(resolver,
                 Settings.System.STATUS_BAR_CIRCLE_BATTERY_ANIMATIONSPEED, 3,
                 UserHandle.USER_CURRENT);
-        mCustomColor = Settings.System.getIntForUser(resolver,
-                Settings.System.CUSTOM_SYSTEM_ICON_COLOR, 0, UserHandle.USER_CURRENT) == 1;
-        systemColor = Settings.System.getIntForUser(resolver,
-                Settings.System.SYSTEM_ICON_COLOR, -2, UserHandle.USER_CURRENT);
 
         int defaultColor = res.getColor(com.android.systemui.R.color.batterymeter_charge_color);
 
