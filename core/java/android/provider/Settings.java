@@ -1806,6 +1806,12 @@ public final class Settings {
             "bluetooth_discoverability_timeout";
 
         /**
+         * If all file types can be accepted over Bluetooth OBEX.
+         */
+        public static final String BLUETOOTH_ACCEPT_ALL_FILES =
+            "bluetooth_accept_all_files";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Secure#LOCK_PATTERN_ENABLED}
          * instead
          */
@@ -4770,6 +4776,11 @@ public final class Settings {
         public static final String NON_INTRUSIVE_INCALL = "non_intrusive_incall";
 
         /**
+	 * @hide
+	 */
+	public static final String SMART_PHONE_CALLER = "smart_phone_caller";
+
+        /**
          * Should Flip to Silence be used
          *
          * @hide
@@ -5141,6 +5152,14 @@ public final class Settings {
         public static final String RECENT_PANEL_FAVORITES = "recent_panel_favorites";
 
         /**
+         * Recent panel expanded mode (auto = 0, always = 1, never = 2).
+         * default = 0.
+         *
+         * @hide
+         */
+        public static final String RECENT_PANEL_EXPANDED_MODE = "recent_panel_expanded_mode";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -5162,6 +5181,7 @@ public final class Settings {
             MMS_AUTO_RETRIEVAL_ON_ROAMING,
             BLUETOOTH_DISCOVERABILITY,
             BLUETOOTH_DISCOVERABILITY_TIMEOUT,
+            BLUETOOTH_ACCEPT_ALL_FILES,
             DIM_SCREEN,
             SCREEN_OFF_TIMEOUT,
             SCREEN_BRIGHTNESS,
@@ -6300,6 +6320,26 @@ public final class Settings {
          * @hide
          */
         public static final String LOCK_BEFORE_UNLOCK = "lock_before_unlock";
+
+        /**
+         *Whether shaking the device enables a secure screen
+         * @hide
+         */
+        public static final String LOCK_SHAKE_TEMP_SECURE = "lock_shake_temp_secure";
+
+        /**
+         *When LOCK_SHAKE_TEMP_SECURE is enabled, the time
+         *before a secure lock will auto-engage in milliseconds
+         * @hide
+         */
+        public static final String LOCK_SHAKE_SECURE_TIMER = "lock_shake_secure_timer";
+
+        /**
+         *Whether the device will unlock itself or not upon completeion
+         *of the insecure lock challenge
+         * @hide
+         */
+        public static final String LOCK_TEMP_SECURE_MODE = "lock_temp_secure_mode";
 
         /**
          * Determines the width and height of the LockPatternView widget
