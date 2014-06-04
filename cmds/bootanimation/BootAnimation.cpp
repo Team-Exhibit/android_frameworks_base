@@ -43,6 +43,8 @@
 #include <gui/SurfaceComposerClient.h>
 
 #include <core/SkBitmap.h>
+#include <core/SkCanvas.h>
+#include <core/SkColor.h>
 #include <core/SkStream.h>
 #include <core/SkImageDecoder.h>
 
@@ -157,6 +159,7 @@ status_t BootAnimation::initTexture(void* buffer, size_t len)
     //StopWatch watch("blah");
 
     SkBitmap bitmap;
+    
     SkMemoryStream  stream(buffer, len);
     SkImageDecoder* codec = SkImageDecoder::Factory(&stream);
     if (codec) {
@@ -170,7 +173,12 @@ status_t BootAnimation::initTexture(void* buffer, size_t len)
                 SkImageDecoder::kDecodePixels_Mode);
         delete codec;
     }
-
+    SkPaint paint;
+    paint.setColor(SK_ColorBLUE);
+    paint.setTextSize(SkIntToScalar(20));
+    SkCanvas* canvas = new SkCanvas(bitmap);
+    canvas->drawText("Meticulus",9,SkIntToScalar(100),SkIntToScalar(100),paint);
+    canvas->save();
     // ensure we can call getPixels(). No need to call unlock, since the
     // bitmap will go out of scope when we return from this method.
     bitmap.lockPixels();
