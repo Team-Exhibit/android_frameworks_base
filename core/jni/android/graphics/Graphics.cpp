@@ -564,6 +564,14 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                           "bitmap size exceeds 32bits");
         return NULL;
     }
+
+    SkImageInfo bitmapInfo;
+    if (!bitmap->asImageInfo(&bitmapInfo)) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "unknown bitmap configuration");
+        return NULL;
+    }
+
     size_t size = size64.get32();
     jbyteArray arrayObj = (jbyteArray) env->CallObjectMethod(gVMRuntime,
                                                              gVMRuntime_newNonMovableArray,
@@ -571,7 +579,8 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
     if (arrayObj) {
         jbyte* addr = (jbyte*)env->CallLongMethod(gVMRuntime, gVMRuntime_addressOf, arrayObj);
         if (addr) {
-            SkPixelRef* pr = new AndroidPixelRef(env, (void*) addr, size, arrayObj, ctable);
+            SkPixelRef* pr = new AndroidPixelRef(env, bitmapInfo, (void*) addr,
+                    bitmap->rowBytes(), arrayObj, ctable);
             bitmap->setPixelRef(pr)->unref();
             // since we're already allocated, we lockPixels right away
             // HeapAllocator behaves this way too
