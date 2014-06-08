@@ -60,7 +60,6 @@ interface IPowerManager
 
     void setKeyboardLight(boolean on, int key);
 
-    // blocked wakelock support
-    String getSeenWakeLocks();	
-
+	void setPowerProfile(String profile);
+	String getPowerProfile();
 }

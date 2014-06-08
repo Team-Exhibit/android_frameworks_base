@@ -223,7 +223,7 @@ class ServerThread {
             ServiceManager.addService(Context.POWER_SERVICE, power);
 
             Slog.i(TAG, "Activity Manager");
-            context = ActivityManagerService.main(factoryTest);
+            context = ActivityManagerService.main(factoryTest, power);
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting bootstrap service", e);
