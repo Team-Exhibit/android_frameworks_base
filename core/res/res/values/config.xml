@@ -1506,7 +1506,7 @@
     <!-- Set to empty string to disable. Can be added to device overlay for device-specific path -->
     <string name="config_fastChargePath" translatable="false">/sys/kernel/fast_charge/force_fast_charge</string>
 
-    <!-- User display names for app ops codes -->
+    <!-- User display names for app ops codes
     <string-array name="app_ops_labels">
         <item>Trying to access location</item>
         <item>Trying to access location</item>
@@ -1558,5 +1558,5 @@
         <item>Trying to read MMS</item>
         <item>Trying to write MMS</item>
         <item>Trying to start at bootup</item>
-    </string-array>
+    </string-array> -->
 </resources>
