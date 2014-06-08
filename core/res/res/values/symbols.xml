@@ -1094,7 +1094,7 @@
   <java-symbol type="drawable" name="jog_tab_target_gray" />
   <java-symbol type="drawable" name="picture_emergency" />
   <java-symbol type="drawable" name="platlogo" />
-  <java-symbol type="drawable" name="cm_platlogo" />
+  <!--<java-symbol type="drawable" name="cm_platlogo" />-->
   <java-symbol type="drawable" name="stat_notify_sync_error" />
   <java-symbol type="drawable" name="stat_notify_wifi_in_range" />
   <java-symbol type="drawable" name="stat_notify_rssi_in_range" />
@@ -1236,7 +1236,7 @@
   <java-symbol type="layout" name="restrictions_pin_challenge" />
   <java-symbol type="layout" name="restrictions_pin_setup" />
   <java-symbol type="layout" name="immersive_mode_cling" />
-  <java-symbol type="layout" name="immersive_mode_cling_bottom" />
+  <!--<java-symbol type="layout" name="immersive_mode_cling_bottom" />-->
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
@@ -1679,8 +1679,8 @@
   <java-symbol type="dimen" name="status_bar_icon_size" />
   <java-symbol type="dimen" name="system_bar_icon_size" />
   <java-symbol type="drawable" name="list_selector_pressed_holo_dark" />
-  <java-symbol type="drawable" name="scrubber_control_disabled_holo" />
-  <java-symbol type="drawable" name="scrubber_control_selector_holo" />
+  <!--<java-symbol type="drawable" name="scrubber_control_disabled_holo" />
+  <java-symbol type="drawable" name="scrubber_control_selector_holo" />-->
   <java-symbol type="drawable" name="scrubber_progress_horizontal_holo_dark" />
   <java-symbol type="drawable" name="usb_android" />
   <java-symbol type="drawable" name="usb_android_connected" />
@@ -1856,7 +1856,7 @@
   <java-symbol type="drawable" name="ic_lock_reboot" />
   <java-symbol type="drawable" name="ic_lock_profile" />
   <java-symbol type="drawable" name="ic_lock_expanded_desktop" />
-  <java-symbol type="drawable" name="ic_lock_expanded_desktop_off" />
+  <!--<java-symbol type="drawable" name="ic_lock_expanded_desktop_off" />-->
 
   <!-- Profiles -->
   <java-symbol type="xml" name="profile_default" />
@@ -1907,7 +1907,7 @@
   <!-- LED flashlight -->
   <java-symbol type="bool" name="config_enableTorch" />
 
-  <!-- Navigation Ring -->
+  <!-- Navigation Ring
   <java-symbol type="drawable" name="ic_navigation_ring_blank_normal" />
   <java-symbol type="drawable" name="ic_navigation_ring_blank_activated" />
   <java-symbol type="drawable" name="ic_navigation_ring_empty" />
@@ -1919,16 +1919,16 @@
   <java-symbol type="drawable" name="ic_navigation_ring_sound_on" />
   <java-symbol type="drawable" name="ic_navigation_ring_torch_on" />
   <java-symbol type="drawable" name="ic_navigation_ring_torch_off" />
-  <java-symbol type="drawable" name="ic_navigation_ring_vibrate" />
+  <java-symbol type="drawable" name="ic_navigation_ring_vibrate" /> -->
 
   <!-- Performance Profiles -->
   <java-symbol type="string" name="config_perf_profile_prop" />
-  <java-symbol type="string" name="config_perf_profile_default_entry" />
+  <!--<java-symbol type="string" name="config_perf_profile_default_entry" />
   <java-symbol type="array" name="perf_profile_entries" />
   <java-symbol type="array" name="perf_profile_values" />
   <java-symbol type="string" name="perf_profile_pwrsv" />
   <java-symbol type="string" name="perf_profile_bal" />
-  <java-symbol type="string" name="perf_profile_perf" />
+  <java-symbol type="string" name="perf_profile_perf" />-->
 
   <!-- Options that show upon long-pressing a key on the physical keyboard -->
   <java-symbol type="string" name="symbol_picker_0" />
