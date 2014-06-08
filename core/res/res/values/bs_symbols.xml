@@ -63,7 +63,7 @@
   <java-symbol type="string" name="reboot_system" />
 
   <!-- Config IME switcher -->
-  <java-symbol type="bool" name="config_show_IMESwitcher" />
+  <!--<java-symbol type="bool" name="config_show_IMESwitcher" />-->
 
   <!-- Power menu -->
   <java-symbol type="color" name="power_menu_icon_default_color" />
@@ -87,7 +87,7 @@
   <java-symbol type="string" name="description_target_unlock" />
   
   <!-- Statusbar double tap gesture -->
-  <java-symbol type="bool" name="config_disableDoubleTapSleepGesture" />
+  <!--<java-symbol type="bool" name="config_disableDoubleTapSleepGesture" />-->
 
   <!-- BeanStalk platlogo -->
   <java-symbol type="drawable" name="bs_platlogo" />
