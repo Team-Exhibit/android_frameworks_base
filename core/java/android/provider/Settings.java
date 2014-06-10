@@ -6744,6 +6744,19 @@ public final class Settings {
         public static final String ENABLED_ON_FIRST_BOOT_SYSTEM_PRINT_SERVICES =
             "enabled_on_first_boot_system_print_services";
 
+/**
+         * Performance profile
+         * @see config_perf_profile_prop in frameworks/base/core/res/res/values/config.xml
+         * @hide
+         */
+        public static final String PERFORMANCE_PROFILE = "performance_profile";
+
+        /**
+         * App-based performance profile selection
+         * @hide
+         */
+        public static final String APP_PERFORMANCE_PROFILES_ENABLED = "app_perf_profiles_enabled";
+
         /**
          * Setting to always use the default text-to-speech settings regardless
          * of the application settings.

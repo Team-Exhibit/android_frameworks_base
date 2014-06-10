@@ -666,7 +666,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             op.allowedCount++;
             return AppOpsManager.MODE_ALLOWED;
         }
-        return userDialogResult.get();
+        //return userDialogResult.get();
     }
 
     @Override

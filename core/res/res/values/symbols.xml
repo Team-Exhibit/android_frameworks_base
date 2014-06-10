@@ -1679,6 +1679,11 @@
 <!-- Fix build error sort later -->
   <java-symbol type="id" name="checkbox_always" /> 
   <java-symbol type="string" name="config_fastChargePath" />
+  <java-symbol type="integer" name="config_immersive_mode_confirmation_panic" />
+  <java-symbol type="integer" name="config_uiInvertedMode" />
+  <java-symbol type="integer" name="min_gesture_prediction_score" />
+  <java-symbol type="bool" name="config_show_IMESwitcher"/>
+  <java-symbol type="string" name="permission" />
 <!-- Progress Bar -->
   <java-symbol type="dimen" name="spb_default_stroke_width" />
   <java-symbol type="dimen" name="spb_default_stroke_separator_length" />
@@ -1983,9 +1988,9 @@
   <java-symbol type="drawable" name="ic_navigation_ring_vibrate" /> -->
 
   <!-- Performance Profiles -->
-  <!--<java-symbol type="string" name="config_perf_profile_prop" />-->
+  <java-symbol type="string" name="config_perf_profile_prop" />
   <java-symbol type="string" name="config_perf_profile_default_entry" />
-  <!--<java-symbol type="array" name="perf_profile_entries" /> -->
+  <!--<java-symbol type="array" name="perf_profile_entries" />
   <java-symbol type="array" name="perf_profile_values" />
   <java-symbol type="string" name="perf_profile_pwrsv" />
   <java-symbol type="string" name="perf_profile_bal" />
