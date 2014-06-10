@@ -1431,6 +1431,9 @@
     <bool name="config_forceDisableHardwareKeyboard">false</bool>
 
     <!-- Setting to false will disable CM's IME switcher implementation for tablets -->
+    <bool name="config_show_cmIMESwitcher">true</bool>
+
+<!-- Setting to false will disable CM's IME switcher implementation for tablets -->
     <bool name="config_show_IMESwitcher">true</bool>
 
     <!-- Boolean to enable stk functionality on Samsung phones -->

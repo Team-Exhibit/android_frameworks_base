@@ -1745,6 +1745,8 @@
   <java-symbol type="dimen" name="status_bar_icon_size" />
   <java-symbol type="dimen" name="system_bar_icon_size" />
   <java-symbol type="drawable" name="list_selector_pressed_holo_dark" />
+  <java-symbol type="drawable" name="scrubber_control_disabled_holo_dark" />
+  <java-symbol type="drawable" name="scrubber_control_selector_holo_dark" />
   <!--<java-symbol type="drawable" name="scrubber_control_disabled_holo" />
   <java-symbol type="drawable" name="scrubber_control_selector_holo" />-->
   <java-symbol type="drawable" name="scrubber_progress_horizontal_holo_dark" />
@@ -1990,11 +1992,11 @@
   <!-- Performance Profiles -->
   <java-symbol type="string" name="config_perf_profile_prop" />
   <java-symbol type="string" name="config_perf_profile_default_entry" />
-  <!--<java-symbol type="array" name="perf_profile_entries" />
+  <java-symbol type="array" name="perf_profile_entries" />
   <java-symbol type="array" name="perf_profile_values" />
   <java-symbol type="string" name="perf_profile_pwrsv" />
   <java-symbol type="string" name="perf_profile_bal" />
-  <java-symbol type="string" name="perf_profile_perf" />-->
+  <java-symbol type="string" name="perf_profile_perf" />
 
   <!-- Options that show upon long-pressing a key on the physical keyboard -->
   <java-symbol type="string" name="symbol_picker_0" />
